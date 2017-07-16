@@ -1,6 +1,6 @@
 import pandas
 import analyze_ABC
-import Name_checker
+#import Name_checker
 
 # define excel files
 results_output_file = pandas.ExcelWriter(r"D:\PyToExel\Results\ABC_ver2.xlsx")
@@ -34,10 +34,9 @@ print(bad_names_list)
 
 
 
-#Main_table.set_index(['Группа', 'Подгруппа', 'Товар'], drop=True, append=True, inplace=True)
-#data_to_analyse.set_index(['Группа', 'Подгруппа', 'Товар'], drop=True, inplace=True)
-#data_to_analyse = data_to_analyse.sort_index()
-#print(data_to_analyse.index)
+data_to_analyse.set_index(['Группа', 'Товар'], drop=True, append=True, inplace=True)
+for pisun in data_to_analyse.xs('01. Кровельные и гидроизоляционные материалы', axis=0, level=1)['Подгруппа']:
+    print(pisun)
 
 
 #Goods_table.set_index(['Группа', 'Подгруппа', 'Товар'], drop=True, inplace=True)

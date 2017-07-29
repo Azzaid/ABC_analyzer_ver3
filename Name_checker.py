@@ -13,7 +13,7 @@ def check(check_table, master_table, recursion_depth, grouping_depth, **kwargs):
                 right_name_lenght = len(right_name.split(" "))
                 for word_to_check in name_to_check.split(" "):
                     if word_to_check in right_name: match_worlds += 1
-                if (match_worlds - right_name_lenght) <= 1 and match_worlds > 0: posible_changes[name_to_check].append(right_name)
+                if (right_name_lenght - match_worlds) <= 1 and match_worlds > 0: posible_changes[name_to_check].append(right_name)
 
 #go one grouping level down
     if recursion_depth < grouping_depth:

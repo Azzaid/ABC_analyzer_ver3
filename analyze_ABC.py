@@ -13,3 +13,5 @@ def analyze(table, pivot_by, value, function, abc_groups, **kwargs):
     Grouped_table['Группа по ' + value] = pandas.cut(Grouped_table['Нарастающий процент ' + value], abc_groups, right=True, labels = ['A', 'B', 'C'])
 
     return Grouped_table
+
+def deep_analyze()

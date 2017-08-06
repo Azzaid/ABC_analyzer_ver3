@@ -49,6 +49,6 @@ for period in periods_for_abc:
                                                levels_for_ABC=levels_for_abc,
                                                values_for_ABC=values_for_abc,
                                                grouping_depth=grouping_depth,
-                                               recursion_depth=1)
+                                               recursion_depth=0)
 
 # constructing output table

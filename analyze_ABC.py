@@ -17,12 +17,19 @@ def analyze(table, pivot_by, value, function, abc_groups, **kwargs):
 
 def deep_analyze(table, time, upgroup, levels_for_ABC, values_for_ABC, grouping_depth, recursion_depth, **kwargs):
 
+    print('глубина реурсии', recursion_depth, 'анализирую', levels_for_ABC[recursion_depth], 'внутри', upgroup)
+
     #create dict levels and keys to store analysis results
     debug_table_list = {levels_for_ABC[recursion_depth]:{upgroup:{}}}
     short_table_list = {levels_for_ABC[recursion_depth]:{upgroup:{}}}
 
     #pre-made short table to fill it with info from different values analysis
-    short_table_list[levels_for_ABC[recursion_depth]] = pandas.DataFrame(index=table[levels_for_ABC[recursion_depth]].drop_duplicates(keep='first'),
+    print('анализирую строки', table[levels_for_ABC[recursion_depth]], '    ', len(table[levels_for_ABC[recursion_depth]]))
+    if type(table[levels_for_ABC[recursion_depth]]) != str:
+        short_table_list[levels_for_ABC[recursion_depth]] = pandas.DataFrame(index=table[levels_for_ABC[recursion_depth]].drop_duplicates(keep='first'),
+                                                                         columns=[[time], ['% дохода']])
+    else:
+        short_table_list[levels_for_ABC[recursion_depth]] = pandas.DataFrame(index=table[levels_for_ABC[recursion_depth]],
                                                                          columns=[[time], ['% дохода']])
     short_table_list[levels_for_ABC[recursion_depth]].loc[:, (time, 'группы')] = ''
 
@@ -50,7 +57,9 @@ def deep_analyze(table, time, upgroup, levels_for_ABC, values_for_ABC, grouping_
         table.set_index([levels_for_ABC[recursion_depth]], drop=True, inplace=True, append=False)
 
         # analyse subgroups in every group
-        for GroupToDive in table.index:
+        print('провести анализ в группах', table.index.drop_duplicates(keep='first'))
+        for GroupToDive in table.index.drop_duplicates(keep='first'):
+            print('провожу анализ подгрупп в группе', GroupToDive)
             deeper_debug_table_list, deeper_short_table_list = deep_analyze(table=table.xs(GroupToDive, axis=0),
                                                                             upgroup=GroupToDive,
                                                                             time=time,

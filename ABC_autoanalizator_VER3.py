@@ -47,6 +47,7 @@ periods_for_abc.extend(months_to_analyse.tolist())
 # abc analysis
 short_table = pandas.DataFrame()
 for period in periods_for_abc:
+    print('Анализирую период', period)
     short_table_part = analyze_ABC.deep_analyze(
         table=data_to_analyse[period],
         upgroup='main',
@@ -55,10 +56,13 @@ for period in periods_for_abc:
         values_for_ABC=values_for_abc,
         grouping_depth=grouping_depth,
         debug_file= debug_output_file,
-        recursion_depth=0)
+        recursion_depth=0,
+        upgroup_list=[])
+    print('Получил таблицу', short_table_part)
 
-    #short_table = pandas.concat((short_table, short_table_part), axis=1, join='outer')
-    short_table = short_table.join(short_table_part, how='outer')
+    short_table = pandas.concat((short_table, short_table_part), axis=1, join='outer')
+    #short_table = short_table.join(short_table_part, how='outer')
+    #short_table = short_table.append(short_table_part)
 
 
 short_table.to_excel(results_output_file, 'Финал')

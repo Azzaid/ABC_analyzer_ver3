@@ -15,9 +15,9 @@ def analyze(table, pivot_by, value, function, abc_groups, **kwargs):
     return Grouped_table
 
 
-def deep_analyze(table, time, upgroup, levels_for_ABC, values_for_ABC, grouping_depth, debug_file, recursion_depth, numerator='', **kwargs):
+def deep_analyze(table, time, upgroup, levels_for_ABC, values_for_ABC, grouping_depth, debug_file, recursion_depth, upgroup_list,  **kwargs):
 
-    print('глубина реурсии', recursion_depth, 'анализирую', levels_for_ABC[recursion_depth], 'внутри', upgroup)
+    print('глубина реурсии', recursion_depth, 'анализирую уровень ', levels_for_ABC[recursion_depth], 'внутри ', upgroup)
 
     #pre-made short table to fill it with info from different values analysis
     if type(table[levels_for_ABC[recursion_depth]]) == str:
@@ -30,7 +30,6 @@ def deep_analyze(table, time, upgroup, levels_for_ABC, values_for_ABC, grouping_
             index=table[levels_for_ABC[recursion_depth]].drop_duplicates(keep='first'),
             columns=[[time], ['% дохода']])
         short_table.loc[:, (time, 'группы')] = ''
-
 
     #calculate income percent and fill it into short table
     income_table = table.pivot_table(index=levels_for_ABC[recursion_depth],
@@ -48,32 +47,40 @@ def deep_analyze(table, time, upgroup, levels_for_ABC, values_for_ABC, grouping_
             function = values_for_ABC[value]['function'],
             abc_groups = values_for_ABC[value]['abc_groups'])
 
-        #fill info about abc group and income percent into short table
+        #fill info about abc group into short table
         short_table.loc[:, (time, 'группы')] += \
             debug_table['Группа по ' + value].astype(str)
-        debug_table.to_excel(debug_file, str(time)+str(upgroup)[:4]+str(value))
 
-    #numerate every row for easy sorting once it all will be unloaded into excell
-#will do it later
+        debug_table.to_excel(debug_file, str(time)+str(upgroup)[:8]+str(value))
 
-    #analyse subgrupp if there are subgrupp
+    #Construct multiindex for proper sorting
+    for i in range(0,grouping_depth+1):
+        if i < recursion_depth:
+            short_table[levels_for_ABC[i]] = str(upgroup_list[i])
+        elif i == recursion_depth:
+            short_table.reset_index(inplace=True, col_level=0)
+        elif i > recursion_depth:
+            short_table[levels_for_ABC[i]] = ''
+    short_table.set_index(levels_for_ABC, inplace=True)
+
+    #if there are subgrupps
     if recursion_depth < grouping_depth:
 
-        #turn group name into index to chose rows for in-group analysis
-        table.set_index([levels_for_ABC[recursion_depth]], drop=True, inplace=True, append=False)
-
         # analyse subgroups in every group
-        for GroupToDive in table.index.drop_duplicates(keep='first'):
-            print('провожу анализ подгрупп в группе', GroupToDive)
+        for GroupToDive in short_table.index.get_level_values(recursion_depth).drop_duplicates():
+            print('провожу анализ подгрупп в группе ', GroupToDive)
+            passing_list = upgroup_list[:]
+            passing_list.append(str(GroupToDive))
             short_table_part = deep_analyze(
-                table=table.xs(GroupToDive, axis=0),
+                table=table[table[levels_for_ABC[recursion_depth]] == GroupToDive],
                 upgroup=GroupToDive,
                 time=time,
                 levels_for_ABC=levels_for_ABC,
                 values_for_ABC=values_for_ABC,
                 grouping_depth=grouping_depth,
                 recursion_depth=recursion_depth+1,
-                debug_file=debug_file)
+                debug_file=debug_file,
+                upgroup_list=passing_list)
             short_table = pandas.concat((short_table, short_table_part), axis=0, join='outer')
 
     return(short_table)
